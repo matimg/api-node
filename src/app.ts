@@ -1,46 +1,27 @@
-import * as express from "express";
-import {Request, Response} from "express";
-import {createConnection} from "typeorm";
-import {User} from "./entities/User";
 
-// create typeorm connection
-createConnection().then(connection => {
-    const userRepository = connection.getRepository(User);
+import { createConnection } from 'typeorm';
+import publicRoutes from './public_routes'
+import express = require('express');
+import cors = require('cors');
+import morgan = require('morgan');
 
-    // create and setup express app
-    const app = express();
-    app.use(express.json());
+const PORT:string = process.env.PORT || '3000';
+const app = express();
 
-    // register routes
+// create a database connection based on the ./ormconfig.js file
+const connectionPromess = createConnection();
 
-    app.get("/users", async function(req: Request, res: Response) {
-        const users = await userRepository.find();
-        res.json(users);
-    });
+app.use(cors()) //disable CORS validations
+app.use(express.json()) // the API will be JSON based for serialization
+app.use(morgan('dev')); //logging
+app.use(publicRoutes);
 
-    app.get("/users/:id", async function(req: Request, res: Response) {
-        const results = await userRepository.findOne(req.params.id);
-        return res.send(results);
-    });
+// default empty route for 404
+app.use( (req, res) => res.status(404).json({ "message": "Not found" }))
 
-    app.post("/users", async function(req: Request, res: Response) {
-        const user = await userRepository.create(req.body);
-        const results = await userRepository.save(user);
-        return res.send(results);
-    });
-
-    app.put("/users/:id", async function(req: Request, res: Response) {
-        const user = await userRepository.findOne(req.params.id);
-        userRepository.merge(user, req.body);
-        const results = await userRepository.save(user);
-        return res.send(results);
-    });
-
-    app.delete("/users/:id", async function(req: Request, res: Response) {
-        const results = await userRepository.delete(req.params.id);
-        return res.send(results);
-    });
-
-    // start express server
-    app.listen(3000);
-});
+// start the express server, listen to requests on PORT
+app.listen(PORT , () => 
+	console.info(
+`==> Listening on port ${PORT}.`
+	)
+);

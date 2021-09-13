@@ -5,6 +5,9 @@
       "module": "commonjs",
       "moduleResolution": "node",
       "emitDecoratorMetadata": true,
-      "experimentalDecorators": true
-    }
+      "experimentalDecorators": true,
+      "outDir": "./dist", 
+      "rootDir": "./src",                
+    },
+    "compileOnSave": true
   }
