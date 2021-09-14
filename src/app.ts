@@ -1,6 +1,7 @@
 
 import { createConnection } from 'typeorm';
 import publicRoutes from './public_routes'
+import * as actions from './actions';
 import express = require('express');
 import cors = require('cors');
 import morgan = require('morgan');
@@ -9,7 +10,9 @@ const PORT:string = process.env.PORT || '3000';
 const app = express();
 
 // create a database connection based on the ./ormconfig.js file
-const connectionPromess = createConnection();
+createConnection();
+
+actions.getSpotifyToken();
 
 app.use(cors()) //disable CORS validations
 app.use(express.json()) // the API will be JSON based for serialization
@@ -25,3 +28,8 @@ app.listen(PORT , () =>
 `==> Listening on port ${PORT}.`
 	)
 );
+
+setInterval(() => {
+	console.log("Hola");
+	actions.getSpotifyToken();
+}, 1000 * 60 * 60);

@@ -36,37 +36,59 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAlbums = void 0;
-// credentials are optional
+exports.getAlbums = exports.getSpotifyToken = void 0;
+var utils_1 = require("./utils");
+// Set necessary parts of the credentials on the constructor
 var SpotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new SpotifyWebApi({
     clientId: '6e23d575ceee45f2b6aeefb606ab3a42',
     clientSecret: '97af3dc00ecc4dda90671e4d9ffba270'
 });
-spotifyApi.setAccessToken('BQBEtzI4T79CXRBdFe4UXzUWRNTre0dvQwidJHkmEpGLzoTwSQwZwYJZjmfhlarm-L4mIxY_3FtoGcI4jPw');
-// Retrieve an access token.
-/*spotifyApi.clientCredentialsGrant().then(
-    function(data) {
-      console.log('The access token expires in ' + data.body['expires_in']);
-      console.log('The access token is ' + data.body['access_token']);
-  
-      // Save the access token so that it's used in future calls
-      spotifyApi.setAccessToken(data.body['access_token']);
-    },
-    function(err) {
-      console.log('Something went wrong when retrieving an access token', err);
-    }*/
+// Get an access token and 'save' it using a setter
+var getSpotifyToken = function () {
+    spotifyApi.clientCredentialsGrant().then(function (data) {
+        console.log('El token de acceso es: ' + data.body['access_token']);
+        spotifyApi.setAccessToken(data.body['access_token']);
+    }, function (err) {
+        console.log('Ha ocurrido un error!', err);
+    });
+};
+exports.getSpotifyToken = getSpotifyToken;
 var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var respuesta;
     return __generator(this, function (_a) {
-        respuesta = "";
-        spotifyApi.search('La Vela Puerca', ['track', 'album'], { limit: 5, offset: 1 })
-            .then(function (data) {
-            console.log("DATA:", data.body.albums.items);
-        }, function (err) {
-            console.log("ERROR", err);
-        });
-        return [2 /*return*/, res.json({ message: respuesta })];
+        switch (_a.label) {
+            case 0:
+                if (!req.body.nombreArtista)
+                    throw new utils_1.Exception("Por favor ingrese nombre de artista en el body", 400);
+                respuesta = "";
+                return [4 /*yield*/, spotifyApi.searchArtists(req.body.nombreArtista)
+                        .then(function (data) {
+                        return __awaiter(this, void 0, void 0, function () {
+                            var artistaId;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        artistaId = data.body.artists.items[0].id;
+                                        return [4 /*yield*/, spotifyApi.getArtistAlbums(artistaId)
+                                                .then(function (data) {
+                                                respuesta = data;
+                                            }, function (err) {
+                                                respuesta = err;
+                                            })];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        });
+                    }, function (err) {
+                        respuesta = err;
+                    })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/, res.json({ message: respuesta })];
+        }
     });
 }); };
 exports.getAlbums = getAlbums;
