@@ -41,5 +41,5 @@ export const getAlbums = async (req: Request, res: Response): Promise<Response> 
             respuesta = err;
         });
 
-    return res.json({ message: respuesta });
+    return res.json({ data: respuesta });
 }
