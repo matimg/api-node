@@ -25,15 +25,42 @@ export const getSpotifyToken = () => {
 
 
 export const getAlbums = async (req: Request, res: Response): Promise<Response> => {
-    if (!req.body.nombreArtista) 
+    if (!req.body.nombreArtista)
         throw new Exception("Por favor ingrese nombre de artista en el body", 400);
-    var respuesta = "";
+    var respuesta : any;
     await spotifyApi.searchArtists(req.body.nombreArtista)
         .then(async function (data) {
             let artistaId = data.body.artists.items[0].id;
             await spotifyApi.getArtistAlbums(artistaId)
-                .then(function (data) {
-                    respuesta = data
+                .then(async function (data) {
+                    let albums: [] = data.body.items;
+                    let albumsId = [];
+                    for (let i = 0; i < albums.length; i++) {
+                        albumsId.push(albums[i]['id']);
+                    }
+                    await spotifyApi.getAlbums(albumsId)
+                        .then(function (data) {
+                            let albums = data.body.albums;
+                            let result = [];
+                            for (let i = 0; i < albums.length; i++) {
+                                let album = {
+                                    id: albums[i]['id'],
+                                    nombre: albums[i]['name'],
+                                    popularidad: albums[i]['popularity'],
+                                    fecha: albums[i]['release_date'],
+                                    imagenes: albums[i]['images']
+                                }
+                                result.push(album);
+                            }
+                            result.sort(function (a, b){
+                                return (b.popularidad - a.popularidad)
+                            });
+                            
+                            respuesta = result;
+                            
+                        }, function (err) {
+                            console.error(err);
+                        });
                 }, function (err) {
                     respuesta = err;
                 });

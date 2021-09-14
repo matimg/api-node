@@ -61,7 +61,6 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
             case 0:
                 if (!req.body.nombreArtista)
                     throw new utils_1.Exception("Por favor ingrese nombre de artista en el body", 400);
-                respuesta = "";
                 return [4 /*yield*/, spotifyApi.searchArtists(req.body.nombreArtista)
                         .then(function (data) {
                         return __awaiter(this, void 0, void 0, function () {
@@ -72,7 +71,43 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                                         artistaId = data.body.artists.items[0].id;
                                         return [4 /*yield*/, spotifyApi.getArtistAlbums(artistaId)
                                                 .then(function (data) {
-                                                respuesta = data;
+                                                return __awaiter(this, void 0, void 0, function () {
+                                                    var albums, albumsId, i;
+                                                    return __generator(this, function (_a) {
+                                                        switch (_a.label) {
+                                                            case 0:
+                                                                albums = data.body.items;
+                                                                albumsId = [];
+                                                                for (i = 0; i < albums.length; i++) {
+                                                                    albumsId.push(albums[i]['id']);
+                                                                }
+                                                                return [4 /*yield*/, spotifyApi.getAlbums(albumsId)
+                                                                        .then(function (data) {
+                                                                        var albums = data.body.albums;
+                                                                        var result = [];
+                                                                        for (var i = 0; i < albums.length; i++) {
+                                                                            var album = {
+                                                                                id: albums[i]['id'],
+                                                                                nombre: albums[i]['name'],
+                                                                                popularidad: albums[i]['popularity'],
+                                                                                fecha: albums[i]['release_date'],
+                                                                                imagenes: albums[i]['images']
+                                                                            };
+                                                                            result.push(album);
+                                                                        }
+                                                                        result.sort(function (a, b) {
+                                                                            return (b.popularidad - a.popularidad);
+                                                                        });
+                                                                        respuesta = result;
+                                                                    }, function (err) {
+                                                                        console.error(err);
+                                                                    })];
+                                                            case 1:
+                                                                _a.sent();
+                                                                return [2 /*return*/];
+                                                        }
+                                                    });
+                                                });
                                             }, function (err) {
                                                 respuesta = err;
                                             })];
@@ -87,7 +122,7 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                     })];
             case 1:
                 _a.sent();
-                return [2 /*return*/, res.json({ message: respuesta })];
+                return [2 /*return*/, res.json({ data: respuesta })];
         }
     });
 }); };
