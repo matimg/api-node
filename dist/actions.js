@@ -36,24 +36,99 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAlbums = exports.getSpotifyToken = void 0;
+exports.getAlbums = exports.getAlbumsInfo = exports.getAlbumsIdByArtist = exports.getArtistByName = exports.getSpotifyToken = void 0;
+var SpotifyWebApi = require("spotify-web-api-node");
 var utils_1 = require("./utils");
-// Set necessary parts of the credentials on the constructor
-var SpotifyWebApi = require('spotify-web-api-node');
+require('dotenv').config();
+//Se setean credenciales en constuctor de spotifywebapi
 var spotifyApi = new SpotifyWebApi({
-    clientId: '6e23d575ceee45f2b6aeefb606ab3a42',
-    clientSecret: '97af3dc00ecc4dda90671e4d9ffba270'
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET
 });
-// Get an access token and 'save' it using a setter
+//Obtiene y guarda token de acceso a la api
 var getSpotifyToken = function () {
     spotifyApi.clientCredentialsGrant().then(function (data) {
-        console.log('El token de acceso es: ' + data.body['access_token']);
         spotifyApi.setAccessToken(data.body['access_token']);
     }, function (err) {
         console.log('Ha ocurrido un error!', err);
     });
 };
 exports.getSpotifyToken = getSpotifyToken;
+//Recibe el nombre de un artista y devuelve el id de la primera coincidencia
+var getArtistByName = function (artistName) { return __awaiter(void 0, void 0, void 0, function () {
+    var respuesta;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, spotifyApi.searchArtists(artistName)
+                    .then(function (data) {
+                    respuesta = data.body.artists.items[0].id;
+                }, function (err) {
+                    respuesta = err;
+                })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/, respuesta];
+        }
+    });
+}); };
+exports.getArtistByName = getArtistByName;
+//Recibe el id de un artista y devuelve el id de todos sus albumes
+var getAlbumsIdByArtist = function (artistId) { return __awaiter(void 0, void 0, void 0, function () {
+    var respuesta;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, spotifyApi.getArtistAlbums(artistId)
+                    .then(function (data) {
+                    var albums = data.body.items;
+                    var albumsId = [];
+                    for (var i = 0; i < albums.length; i++) {
+                        albumsId.push(albums[i]['id']);
+                    }
+                    respuesta = albumsId;
+                }, function (err) {
+                    respuesta = err;
+                })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/, respuesta];
+        }
+    });
+}); };
+exports.getAlbumsIdByArtist = getAlbumsIdByArtist;
+//Recibe un array de ids y retorna la lista de albumes detallados y ordenados por popularidad.
+var getAlbumsInfo = function (albumsId) { return __awaiter(void 0, void 0, void 0, function () {
+    var respuesta;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, spotifyApi.getAlbums(albumsId)
+                    .then(function (data) {
+                    var albums = data.body.albums;
+                    var albumList = [];
+                    for (var i = 0; i < albums.length; i++) {
+                        var album = {
+                            id: albums[i]['id'],
+                            nombre: albums[i]['name'],
+                            popularidad: albums[i]['popularity'],
+                            fecha: albums[i]['release_date'],
+                            imagenes: albums[i]['images']
+                        };
+                        albumList.push(album);
+                    }
+                    albumList.sort(function (a, b) {
+                        return (b.popularidad - a.popularidad);
+                    });
+                    respuesta = albumList;
+                }, function (err) {
+                    console.error(err);
+                })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/, respuesta];
+        }
+    });
+}); };
+exports.getAlbumsInfo = getAlbumsInfo;
+//Recibe el nombre de un artista, lo busca, obtiene sus albumes y los devuelve de forma ordenada por popularidad.
 var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var respuesta;
     return __generator(this, function (_a) {
@@ -61,56 +136,34 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
             case 0:
                 if (!req.body.nombreArtista)
                     throw new utils_1.Exception("Por favor ingrese nombre de artista en el body", 400);
-                return [4 /*yield*/, spotifyApi.searchArtists(req.body.nombreArtista)
-                        .then(function (data) {
+                return [4 /*yield*/, (0, exports.getArtistByName)(req.body.nombreArtista)
+                        .then(function (artistId) {
                         return __awaiter(this, void 0, void 0, function () {
-                            var artistaId;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0:
-                                        artistaId = data.body.artists.items[0].id;
-                                        return [4 /*yield*/, spotifyApi.getArtistAlbums(artistaId)
-                                                .then(function (data) {
-                                                return __awaiter(this, void 0, void 0, function () {
-                                                    var albums, albumsId, i;
-                                                    return __generator(this, function (_a) {
-                                                        switch (_a.label) {
-                                                            case 0:
-                                                                albums = data.body.items;
-                                                                albumsId = [];
-                                                                for (i = 0; i < albums.length; i++) {
-                                                                    albumsId.push(albums[i]['id']);
-                                                                }
-                                                                return [4 /*yield*/, spotifyApi.getAlbums(albumsId)
-                                                                        .then(function (data) {
-                                                                        var albums = data.body.albums;
-                                                                        var result = [];
-                                                                        for (var i = 0; i < albums.length; i++) {
-                                                                            var album = {
-                                                                                id: albums[i]['id'],
-                                                                                nombre: albums[i]['name'],
-                                                                                popularidad: albums[i]['popularity'],
-                                                                                fecha: albums[i]['release_date'],
-                                                                                imagenes: albums[i]['images']
-                                                                            };
-                                                                            result.push(album);
-                                                                        }
-                                                                        result.sort(function (a, b) {
-                                                                            return (b.popularidad - a.popularidad);
-                                                                        });
-                                                                        respuesta = result;
-                                                                    }, function (err) {
-                                                                        console.error(err);
-                                                                    })];
-                                                            case 1:
-                                                                _a.sent();
-                                                                return [2 /*return*/];
-                                                        }
-                                                    });
+                                    case 0: return [4 /*yield*/, (0, exports.getAlbumsIdByArtist)(artistId).then(function (albumsId) {
+                                            return __awaiter(this, void 0, void 0, function () {
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0: return [4 /*yield*/, (0, exports.getAlbumsInfo)(albumsId).then(function (albumsInfo) {
+                                                                return __awaiter(this, void 0, void 0, function () {
+                                                                    return __generator(this, function (_a) {
+                                                                        respuesta = albumsInfo;
+                                                                        return [2 /*return*/];
+                                                                    });
+                                                                });
+                                                            }, function (err) {
+                                                                respuesta = err;
+                                                            })];
+                                                        case 1:
+                                                            _a.sent();
+                                                            return [2 /*return*/];
+                                                    }
                                                 });
-                                            }, function (err) {
-                                                respuesta = err;
-                                            })];
+                                            });
+                                        }, function (err) {
+                                            respuesta = err;
+                                        })];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
