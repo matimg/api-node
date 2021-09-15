@@ -85,11 +85,11 @@ export const getAlbumsInfo = async (albumsId: Array<string>): Promise<Album[]> =
 }
 
 //Guarda registro en base de datos
-export const insertRequest = async (nombreArtista:string): Promise<any> =>{
+export const insertRequest = async (nombreArtista:string, ipCliente:string): Promise<any> =>{
     let dateTime = new Date();
     const registroRepo = getRepository(Registro);
     const registro = new Registro();
-    registro.userIP = "12213314";
+    registro.userIP = ipCliente;
     registro.date = dateTime;
     registro.artistName = nombreArtista;
     const nuevoRegistro = registroRepo.create(registro);  //Creo un registro
@@ -103,7 +103,7 @@ export const getAlbums = async (req: Request, res: Response): Promise<Response> 
         throw new Exception("Por favor ingrese nombre de artista en el body", 400);
     var respuesta: any;
     //Grabo registro en la base con ip, fecha y nombre de artista
-    insertRequest(req.body.nombreArtista).then(function(data){
+    insertRequest(req.body.nombreArtista, req.ip).then(function(data){
         console.log(data);
     });
     await getArtistByName(req.body.nombreArtista)

@@ -131,7 +131,7 @@ var getAlbumsInfo = function (albumsId) { return __awaiter(void 0, void 0, void 
 }); };
 exports.getAlbumsInfo = getAlbumsInfo;
 //Guarda registro en base de datos
-var insertRequest = function (nombreArtista) { return __awaiter(void 0, void 0, void 0, function () {
+var insertRequest = function (nombreArtista, ipCliente) { return __awaiter(void 0, void 0, void 0, function () {
     var dateTime, registroRepo, registro, nuevoRegistro, results;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -139,7 +139,7 @@ var insertRequest = function (nombreArtista) { return __awaiter(void 0, void 0, 
                 dateTime = new Date();
                 registroRepo = (0, typeorm_1.getRepository)(Registro_1.Registro);
                 registro = new Registro_1.Registro();
-                registro.userIP = "12213314";
+                registro.userIP = ipCliente;
                 registro.date = dateTime;
                 registro.artistName = nombreArtista;
                 nuevoRegistro = registroRepo.create(registro);
@@ -160,7 +160,7 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                 if (!req.body.nombreArtista)
                     throw new utils_1.Exception("Por favor ingrese nombre de artista en el body", 400);
                 //Grabo registro en la base con ip, fecha y nombre de artista
-                (0, exports.insertRequest)(req.body.nombreArtista).then(function (data) {
+                (0, exports.insertRequest)(req.body.nombreArtista, req.ip).then(function (data) {
                     console.log(data);
                 });
                 return [4 /*yield*/, (0, exports.getArtistByName)(req.body.nombreArtista)
