@@ -1,4 +1,3 @@
-
 import { createConnection } from 'typeorm';
 import publicRoutes from './public_routes'
 import * as actions from './actions';
@@ -6,30 +5,30 @@ import express = require('express');
 import cors = require('cors');
 import morgan = require('morgan');
 
-const PORT:string = process.env.PORT || '3000';
+const PORT:string = process.env.PORT || '3001';
 const app = express();
 
-// create a database connection based on the ./ormconfig.js file
+// Crea la conexion a la base de datos basado en el ormconfig.json
 createConnection();
 
 actions.getSpotifyToken();
 
-app.use(cors()) //disable CORS validations
-app.use(express.json()) // the API will be JSON based for serialization
-app.use(morgan('dev')); //logging
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
 app.use(publicRoutes);
 
-// default empty route for 404
+// Mensaje por defecto cuando no encuentra la ruta especificada
 app.use( (req, res) => res.status(404).json({ "message": "Not found" }))
 
-// start the express server, listen to requests on PORT
+// start servidor express en puerto 3001
 app.listen(PORT , () => 
 	console.info(
 `==> Listening on port ${PORT}.`
 	)
 );
 
+//Cada una hora se refresca token de acceso a la api de spotify
 setInterval(() => {
-	console.log("Hola");
 	actions.getSpotifyToken();
 }, 1000 * 60 * 60);

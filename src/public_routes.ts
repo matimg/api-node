@@ -4,10 +4,7 @@ import { Router } from 'express';
  
  const router = Router();
  
- // signup route, creates a new user in the DB
- // router.post('/user', safe(createUser));
- 
- // LOGIN 
+ //GET Albumes ordenados por popularidad
  router.post('/getAlbums', safe(actions.getAlbums));
 
  export default router;

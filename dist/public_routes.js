@@ -4,8 +4,6 @@ var express_1 = require("express");
 var utils_1 = require("./utils");
 var actions = require("./actions");
 var router = (0, express_1.Router)();
-// signup route, creates a new user in the DB
-// router.post('/user', safe(createUser));
-// LOGIN 
+//GET Albumes ordenados por popularidad
 router.post('/getAlbums', (0, utils_1.safe)(actions.getAlbums));
 exports.default = router;

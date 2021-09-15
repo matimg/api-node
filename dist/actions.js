@@ -36,8 +36,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAlbums = exports.getAlbumsInfo = exports.getAlbumsIdByArtist = exports.getArtistByName = exports.getSpotifyToken = void 0;
+exports.getAlbums = exports.insertRequest = exports.getAlbumsInfo = exports.getAlbumsIdByArtist = exports.getArtistByName = exports.getSpotifyToken = void 0;
+var Registro_1 = require("./entities/Registro");
 var SpotifyWebApi = require("spotify-web-api-node");
+var typeorm_1 = require("typeorm"); // getRepository"  traer una tabla de la base de datos asociada al objeto
 var utils_1 = require("./utils");
 require('dotenv').config();
 //Se setean credenciales en constuctor de spotifywebapi
@@ -128,14 +130,39 @@ var getAlbumsInfo = function (albumsId) { return __awaiter(void 0, void 0, void 
     });
 }); };
 exports.getAlbumsInfo = getAlbumsInfo;
+//Guarda registro en base de datos
+var insertRequest = function (nombreArtista) { return __awaiter(void 0, void 0, void 0, function () {
+    var dateTime, registroRepo, registro, nuevoRegistro, results;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                dateTime = new Date();
+                registroRepo = (0, typeorm_1.getRepository)(Registro_1.Registro);
+                registro = new Registro_1.Registro();
+                registro.userIP = "12213314";
+                registro.date = dateTime;
+                registro.artistName = nombreArtista;
+                nuevoRegistro = registroRepo.create(registro);
+                return [4 /*yield*/, registroRepo.save(nuevoRegistro)];
+            case 1:
+                results = _a.sent();
+                return [2 /*return*/, results];
+        }
+    });
+}); };
+exports.insertRequest = insertRequest;
 //Recibe el nombre de un artista, lo busca, obtiene sus albumes y los devuelve de forma ordenada por popularidad.
 var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var respuesta;
+    var respuesta, respuesta;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 if (!req.body.nombreArtista)
                     throw new utils_1.Exception("Por favor ingrese nombre de artista en el body", 400);
+                //Grabo registro en la base con ip, fecha y nombre de artista
+                (0, exports.insertRequest)(req.body.nombreArtista).then(function (data) {
+                    console.log(data);
+                });
                 return [4 /*yield*/, (0, exports.getArtistByName)(req.body.nombreArtista)
                         .then(function (artistId) {
                         return __awaiter(this, void 0, void 0, function () {

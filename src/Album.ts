@@ -1,4 +1,4 @@
-export class Album{
+export class Album {
     id?: string;
     nombre?: string;
     popularidad?: number;

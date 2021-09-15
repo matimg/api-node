@@ -5,7 +5,7 @@
     "username": "root",
     "password": "root",
     "database": "test",
-    "entities": ["src/entities/*.js"],
+    "entities": ["dist/entities/*.js"],
     "logging": true,
     "synchronize": true
   }
