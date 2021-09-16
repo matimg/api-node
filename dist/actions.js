@@ -159,7 +159,7 @@ var insertRequest = function (nombreArtista, ipCliente) { return __awaiter(void 
 exports.insertRequest = insertRequest;
 //Recibe el nombre de un artista, lo busca, obtiene sus albumes y los devuelve de forma ordenada por popularidad.
 var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var respuesta, artista, albumsInfo, respuesta;
+    var artista, albumsInfo, respuesta;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -183,7 +183,7 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                                                                     return __awaiter(this, void 0, void 0, function () {
                                                                         return __generator(this, function (_a) {
                                                                             albumsInfo = albumsDet;
-                                                                            respuesta = { artist: artist, albumsInfo: albumsInfo };
+                                                                            respuesta = { artista: artista, albumsInfo: albumsInfo };
                                                                             return [2 /*return*/];
                                                                         });
                                                                     });

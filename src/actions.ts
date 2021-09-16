@@ -108,9 +108,9 @@ export const insertRequest = async (nombreArtista:string, ipCliente:string): Pro
 export const getAlbums = async (req: Request, res: Response): Promise<Response> => {
     if (!req.body.nombreArtista || req.body.nombreArtista == "")
         throw new Exception("Por favor ingrese nombre de artista en el body", 400);
-    var respuesta: any;
     var artista: Artist;
     var albumsInfo: Album[];
+    var respuesta: {artista, albumsInfo};
     //Grabo registro en la base con ip, fecha y nombre de artista
     insertRequest(req.body.nombreArtista, req.ip).then(function(data){});
     //Obtengo artista, todos sus albumes y luego el detalle de cada uno
@@ -120,7 +120,7 @@ export const getAlbums = async (req: Request, res: Response): Promise<Response> 
             await getAlbumsIdByArtist(artist.id).then(async function (albumsId) {
                 await getAlbumsInfo(albumsId).then(async function (albumsDet) {
                     albumsInfo = albumsDet;
-                    respuesta = {artist, albumsInfo}
+                    respuesta = {artista, albumsInfo}
                 },
                     function (err) {
                         respuesta = err;
@@ -132,7 +132,6 @@ export const getAlbums = async (req: Request, res: Response): Promise<Response> 
         }, function (err) {
             respuesta = err;
         });
-        var respuesta: any;
 
     return res.json({ respuesta });
 }
