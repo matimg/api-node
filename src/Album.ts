@@ -2,6 +2,6 @@ export class Album {
     id?: string;
     nombre?: string;
     popularidad?: number;
-    fecha?: string
+    fecha?: string;
     imagenes?: any[];
 }

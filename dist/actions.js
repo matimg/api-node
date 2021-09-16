@@ -63,7 +63,13 @@ var getArtistByName = function (artistName) { return __awaiter(void 0, void 0, v
         switch (_a.label) {
             case 0: return [4 /*yield*/, spotifyApi.searchArtists(artistName)
                     .then(function (data) {
-                    respuesta = data.body.artists.items[0].id;
+                    var artist = {
+                        id: data.body.artists.items[0].id,
+                        nombre: data.body.artists.items[0].name,
+                        seguidores: data.body.artists.items[0].followers.total,
+                        imagenes: data.body.artists.items[0].images
+                    };
+                    respuesta = artist;
                 }, function (err) {
                     respuesta = err;
                 })];
@@ -108,11 +114,11 @@ var getAlbumsInfo = function (albumsId) { return __awaiter(void 0, void 0, void 
                     var albumList = [];
                     for (var i = 0; i < albums.length; i++) {
                         var album = {
-                            id: albums[i]['id'],
-                            nombre: albums[i]['name'],
-                            popularidad: albums[i]['popularity'],
-                            fecha: albums[i]['release_date'],
-                            imagenes: albums[i]['images']
+                            id: albums[i].id,
+                            nombre: albums[i].name,
+                            popularidad: albums[i].popularity,
+                            fecha: albums[i].release_date,
+                            imagenes: albums[i].images
                         };
                         albumList.push(album);
                     }
@@ -153,44 +159,46 @@ var insertRequest = function (nombreArtista, ipCliente) { return __awaiter(void 
 exports.insertRequest = insertRequest;
 //Recibe el nombre de un artista, lo busca, obtiene sus albumes y los devuelve de forma ordenada por popularidad.
 var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var respuesta, respuesta;
+    var respuesta, artista, albumsInfo, respuesta;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                if (!req.body.nombreArtista)
+                if (!req.body.nombreArtista || req.body.nombreArtista == "")
                     throw new utils_1.Exception("Por favor ingrese nombre de artista en el body", 400);
                 //Grabo registro en la base con ip, fecha y nombre de artista
-                (0, exports.insertRequest)(req.body.nombreArtista, req.ip).then(function (data) {
-                    console.log(data);
-                });
+                (0, exports.insertRequest)(req.body.nombreArtista, req.ip).then(function (data) { });
+                //Obtengo artista, todos sus albumes y luego el detalle de cada uno
                 return [4 /*yield*/, (0, exports.getArtistByName)(req.body.nombreArtista)
-                        .then(function (artistId) {
+                        .then(function (artist) {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, (0, exports.getAlbumsIdByArtist)(artistId).then(function (albumsId) {
-                                            return __awaiter(this, void 0, void 0, function () {
-                                                return __generator(this, function (_a) {
-                                                    switch (_a.label) {
-                                                        case 0: return [4 /*yield*/, (0, exports.getAlbumsInfo)(albumsId).then(function (albumsInfo) {
-                                                                return __awaiter(this, void 0, void 0, function () {
-                                                                    return __generator(this, function (_a) {
-                                                                        respuesta = albumsInfo;
-                                                                        return [2 /*return*/];
+                                    case 0:
+                                        artista = artist;
+                                        return [4 /*yield*/, (0, exports.getAlbumsIdByArtist)(artist.id).then(function (albumsId) {
+                                                return __awaiter(this, void 0, void 0, function () {
+                                                    return __generator(this, function (_a) {
+                                                        switch (_a.label) {
+                                                            case 0: return [4 /*yield*/, (0, exports.getAlbumsInfo)(albumsId).then(function (albumsDet) {
+                                                                    return __awaiter(this, void 0, void 0, function () {
+                                                                        return __generator(this, function (_a) {
+                                                                            albumsInfo = albumsDet;
+                                                                            respuesta = { artist: artist, albumsInfo: albumsInfo };
+                                                                            return [2 /*return*/];
+                                                                        });
                                                                     });
-                                                                });
-                                                            }, function (err) {
-                                                                respuesta = err;
-                                                            })];
-                                                        case 1:
-                                                            _a.sent();
-                                                            return [2 /*return*/];
-                                                    }
+                                                                }, function (err) {
+                                                                    respuesta = err;
+                                                                })];
+                                                            case 1:
+                                                                _a.sent();
+                                                                return [2 /*return*/];
+                                                        }
+                                                    });
                                                 });
-                                            });
-                                        }, function (err) {
-                                            respuesta = err;
-                                        })];
+                                            }, function (err) {
+                                                respuesta = err;
+                                            })];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
@@ -201,8 +209,9 @@ var getAlbums = function (req, res) { return __awaiter(void 0, void 0, void 0, f
                         respuesta = err;
                     })];
             case 1:
+                //Obtengo artista, todos sus albumes y luego el detalle de cada uno
                 _a.sent();
-                return [2 /*return*/, res.json({ data: respuesta })];
+                return [2 /*return*/, res.json({ respuesta: respuesta })];
         }
     });
 }); };

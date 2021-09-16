@@ -1,8 +1,9 @@
+import { Artist } from './Artist';
 import { Registro } from './entities/Registro';
 import { Album } from './Album';
 import { Request, Response } from 'express'
 import SpotifyWebApi = require('spotify-web-api-node');
-import { getRepository, ObjectLiteral, getConnection } from 'typeorm'  // getRepository"  traer una tabla de la base de datos asociada al objeto
+import { getRepository} from 'typeorm'  // getRepository"  traer una tabla de la base de datos asociada al objeto
 import { Exception } from './utils'
 require('dotenv').config();
 
@@ -25,11 +26,17 @@ export const getSpotifyToken = () => {
 }
 
 //Recibe el nombre de un artista y devuelve el id de la primera coincidencia
-export const getArtistByName = async (artistName: string): Promise<string> => {
-    var respuesta: string;
+export const getArtistByName = async (artistName: string): Promise<Artist> => {
+    var respuesta: Artist;
     await spotifyApi.searchArtists(artistName)
         .then(function (data) {
-            respuesta = data.body.artists.items[0].id;
+            let artist: Artist = {
+                id: data.body.artists.items[0].id,
+                nombre: data.body.artists.items[0].name,
+                seguidores: data.body.artists.items[0].followers.total,
+                imagenes: data.body.artists.items[0].images
+            }
+            respuesta = artist;
         }, function (err) {
             respuesta = err;
         });
@@ -63,11 +70,11 @@ export const getAlbumsInfo = async (albumsId: Array<string>): Promise<Album[]> =
             let albumList: Album[] = [];
             for (let i = 0; i < albums.length; i++) {
                 let album: Album = {
-                    id: albums[i]['id'],
-                    nombre: albums[i]['name'],
-                    popularidad: albums[i]['popularity'],
-                    fecha: albums[i]['release_date'],
-                    imagenes: albums[i]['images']
+                    id: albums[i].id,
+                    nombre: albums[i].name,
+                    popularidad: albums[i].popularity,
+                    fecha: albums[i].release_date,
+                    imagenes: albums[i].images
                 }
                 albumList.push(album);
             }
@@ -99,18 +106,21 @@ export const insertRequest = async (nombreArtista:string, ipCliente:string): Pro
 
 //Recibe el nombre de un artista, lo busca, obtiene sus albumes y los devuelve de forma ordenada por popularidad.
 export const getAlbums = async (req: Request, res: Response): Promise<Response> => {
-    if (!req.body.nombreArtista)
+    if (!req.body.nombreArtista || req.body.nombreArtista == "")
         throw new Exception("Por favor ingrese nombre de artista en el body", 400);
     var respuesta: any;
+    var artista: Artist;
+    var albumsInfo: Album[];
     //Grabo registro en la base con ip, fecha y nombre de artista
-    insertRequest(req.body.nombreArtista, req.ip).then(function(data){
-        console.log(data);
-    });
+    insertRequest(req.body.nombreArtista, req.ip).then(function(data){});
+    //Obtengo artista, todos sus albumes y luego el detalle de cada uno
     await getArtistByName(req.body.nombreArtista)
-        .then(async function (artistId) {
-            await getAlbumsIdByArtist(artistId).then(async function (albumsId) {
-                await getAlbumsInfo(albumsId).then(async function (albumsInfo) {
-                    respuesta = albumsInfo;
+        .then(async function (artist) {
+            artista = artist;
+            await getAlbumsIdByArtist(artist.id).then(async function (albumsId) {
+                await getAlbumsInfo(albumsId).then(async function (albumsDet) {
+                    albumsInfo = albumsDet;
+                    respuesta = {artist, albumsInfo}
                 },
                     function (err) {
                         respuesta = err;
@@ -124,5 +134,5 @@ export const getAlbums = async (req: Request, res: Response): Promise<Response> 
         });
         var respuesta: any;
 
-    return res.json({ data: respuesta });
+    return res.json({ respuesta });
 }
