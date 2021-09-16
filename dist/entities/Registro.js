@@ -9,26 +9,30 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = void 0;
+exports.Registro = void 0;
 var typeorm_1 = require("typeorm");
-var User = /** @class */ (function () {
-    function User() {
+var Registro = /** @class */ (function () {
+    function Registro() {
     }
     __decorate([
         (0, typeorm_1.PrimaryGeneratedColumn)(),
-        __metadata("design:type", Number)
-    ], User.prototype, "id", void 0);
+        __metadata("design:type", String)
+    ], Registro.prototype, "id", void 0);
     __decorate([
         (0, typeorm_1.Column)(),
         __metadata("design:type", String)
-    ], User.prototype, "firstName", void 0);
+    ], Registro.prototype, "userIP", void 0);
+    __decorate([
+        (0, typeorm_1.Column)(),
+        __metadata("design:type", Date)
+    ], Registro.prototype, "date", void 0);
     __decorate([
         (0, typeorm_1.Column)(),
         __metadata("design:type", String)
-    ], User.prototype, "lastName", void 0);
-    User = __decorate([
+    ], Registro.prototype, "artistName", void 0);
+    Registro = __decorate([
         (0, typeorm_1.Entity)()
-    ], User);
-    return User;
+    ], Registro);
+    return Registro;
 }());
-exports.User = User;
+exports.Registro = Registro;

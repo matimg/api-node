@@ -1,15 +1,18 @@
 import {Entity, Column, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
-export class User {
+export class Registro {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id: string;
 
     @Column()
-    firstName: string;
+    userIP: string;
 
     @Column()
-    lastName: string;
+    date: Date;
+
+    @Column()
+    artistName: string;
 
 }
